@@ -1,0 +1,150 @@
+## Programming Assigment 1
+## The Effect of Transmission Type on MPG
+### Author: Zdravka Cankova 
+#### Data: mtcars dataset built into R
+#### Source: Henderson and Velleman (1981), Building multiple regression models interactively. Biometrics, 37, 391–411.
+
+---
+
+#### Overview
+
+The purpose of this project was to use the "mtcars" dataset provided with R to quantify the MPG difference between manual and automatic transmission and determine which type is better for MPG. Multivriate regression analysis was used to show that manual transmission is better for MPG, resulting in a 4.16 mpg increase when compared to automatic. 
+
+#### Data Analysis
+
+First, I looked at the scatterplots of MPG vs. the remaining variables to check if there are any obvious relationships (code shown in Appendix).
+```{r, echo = FALSE, fig.height = 5, fig.width = 10}
+data(mtcars)
+par(mfrow = c(2, 5), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
+with(mtcars, {
+      plot(cyl, mpg,
+           xlab = "Number of cylinders",
+           ylab = "Miles/(US) gallon")
+      plot(disp, mpg,
+           xlab = "Displacement (cu.in.)",
+           ylab = "")
+      plot(hp, mpg,
+           xlab = "Gross horsepower",
+           ylab = "")
+      plot(drat, mpg,
+           xlab = "Rear axle ratio",
+           ylab = "")
+      plot(wt, mpg,
+           xlab = "Weight (lb/1000)",
+           ylab = "")
+      plot(qsec, mpg,
+           xlab = "1/4 mile time",
+           ylab = "Miles/(US) gallon")
+      plot(vs, mpg,
+           xlab = "V/S",
+           ylab = "")
+      plot(am, mpg,
+           xlab = "Transmission (0 = auto, 1 = manual)",
+           ylab = "")
+      plot(gear, mpg,
+           xlab = "Number of forward gears",
+           ylab = "")
+      plot(carb, mpg,
+           xlab = "Number of carburetors",
+           ylab = "")})
+mtext("Figure 1: Scatterplots Exploring the Changes in MPG Based on Other Variables", font = 2, adj = 0, outer = TRUE)
+```
+
+After examining the plots, it appears that most variables seem to be correlated to miles/gallon, except maybe the rear axle ratio, 1/4 mile time and number of forward gears. 
+
+As evidenced in the scatterplots, several variables have clear levels (number of cylinders, V/S, transmission, number of forward gears, and number of carburetors), and so these were converted to factor variables (code not shown).
+
+```{r, echo = FALSE}
+mtcars$cyl <- factor(mtcars$cyl)
+mtcars$vs <- factor(mtcars$vs)
+mtcars$am <- factor(mtcars$am)
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+```
+
+Then I used nested model testing to determine which variables other than transmission have a significant (p < 0.05) contribution to the model (code shown in Appendix).
+```{r, echo = FALSE}
+fitAM <- lm(mpg ~ am, data = mtcars)
+fitCyl <- update(fitAM, mpg ~ am + cyl)
+fitDisp <- update(fitAM, mpg ~ am + cyl + disp)
+fitHp <- update(fitAM, mpg ~ am + cyl + disp + hp)
+fitDrat <- update(fitAM, mpg ~ am + cyl + disp + hp + drat)
+fitWt <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt)
+fitQsec <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec)
+fitVs <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs)
+fitGear <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs + gear)
+fitCarb <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs + gear + carb)
+anova(fitAM, fitCyl, fitDisp, fitHp, fitDrat, fitWt, fitQsec, fitVs, fitGear, fitCarb)
+```
+
+Besides transmission type, only the number of cylinders and gross horsepower contributed significantly (p < 0.05) to the regression model. After inlcuding only these variables, I obtained the following model:
+```{r}
+fitFinal <- lm(mpg ~ am + cyl + hp, data = mtcars)
+summary(fitFinal)$coefficients
+```
+
+Based on the beta coefficient summary, I can conlcude that **manual transmission is significantly better for MPG** (p = 0.003), leading to an average **4.16 mpg increase** when compared to automatic transmission.
+
+The Appendix contains several plots that demonstate the validity of the regression model. The residuals vs. fitted and scale-location plots show that the residuals are identically and independently distributed (iid). The Q-Q plot shows that the residuals are not skewed and there are no outliers. The residuals vs. leverage plot also demonstrates that there are no outliers or highly influential points. These results indicate that this model is an accurate representation of the true relationship between the data. 
+
+#### Appendix
+
+The code used to generate the exploratory scatterplots shown in Figure 1 is below:
+```{r, echo = TRUE, fig.show = 'hide'}
+data(mtcars)
+par(mfrow = c(2, 5), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
+with(mtcars, {
+      plot(cyl, mpg,
+           xlab = "Number of cylinders",
+           ylab = "Miles/(US) gallon")
+      plot(disp, mpg,
+           xlab = "Displacement (cu.in.)",
+           ylab = "")
+      plot(hp, mpg,
+           xlab = "Gross horsepower",
+           ylab = "")
+      plot(drat, mpg,
+           xlab = "Rear axle ratio",
+           ylab = "")
+      plot(wt, mpg,
+           xlab = "Weight (lb/1000)",
+           ylab = "")
+      plot(qsec, mpg,
+           xlab = "1/4 mile time",
+           ylab = "Miles/(US) gallon")
+      plot(vs, mpg,
+           xlab = "V/S",
+           ylab = "")
+      plot(am, mpg,
+           xlab = "Transmission (0 = auto, 1 = manual)",
+           ylab = "")
+      plot(gear, mpg,
+           xlab = "Number of forward gears",
+           ylab = "")
+      plot(carb, mpg,
+           xlab = "Number of carburetors",
+           ylab = "")})
+mtext("Figure 1: Scatterplots Exploring the Changes in MPG Based on Other Variables", font = 2, adj = 0, outer = TRUE)
+```
+
+The code used for nested model testing is shown below:
+```{r, echo = TRUE, results = 'hide'}
+fitAM <- lm(mpg ~ am, data = mtcars)
+fitCyl <- update(fitAM, mpg ~ am + cyl)
+fitDisp <- update(fitAM, mpg ~ am + cyl + disp)
+fitHp <- update(fitAM, mpg ~ am + cyl + disp + hp)
+fitDrat <- update(fitAM, mpg ~ am + cyl + disp + hp + drat)
+fitWt <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt)
+fitQsec <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec)
+fitVs <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs)
+fitGear <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs + gear)
+fitCarb <- update(fitAM, mpg ~ am + cyl + disp + hp + drat + wt + qsec + vs + gear + carb)
+anova(fitAM, fitCyl, fitDisp, fitHp, fitDrat, fitWt, fitQsec, fitVs, fitGear, fitCarb)
+```
+
+The residuals and other diagnostic plots for the final regression model are shown in Figure 3 below: 
+```{r, fig.height = 7, fig.width = 10}
+par(mfrow = c(2, 2), mar = c(4, 4, 2, 1), oma = c(0, 0, 2, 0))
+plot(fitFinal, sub.caption = NA)
+mtext("Figure 2: Residual Plots and Diagnostics", font = 2, adj = 0, outer = TRUE)
+```
